@@ -105,11 +105,11 @@ body {
 
 @media (max-width: 480px) {
     .navbar__label {
-        display: none;
+        font-size: 10px;
     }
 
     .navbar__item {
-        padding: 8px 14px;
+        padding: 8px 12px;
     }
 }
 
@@ -280,6 +280,7 @@ body {
     cursor: pointer;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -777,5 +778,124 @@ body {
 @media (min-width: 1024px) {
     .video-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ============================================
+   Mobile Optimizations
+   ============================================ */
+@media (max-width: 640px) {
+    body {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Navbar: full-width pill on mobile */
+    .navbar-wrapper {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: env(safe-area-inset-bottom, 8px);
+    }
+
+    .navbar {
+        width: 100%;
+        justify-content: space-around;
+        padding: 8px 4px;
+    }
+
+    .navbar__item {
+        flex: 1;
+        padding: 6px 4px;
+        gap: 3px;
+    }
+
+    /* Video cards: tighter on mobile */
+    .video-card__body {
+        padding: 10px 12px 14px;
+    }
+
+    .video-card__title {
+        font-size: 13px;
+    }
+
+    .video-card__meta {
+        font-size: 11px;
+    }
+
+    .video-card__actions {
+        margin-top: 6px;
+        padding-top: 6px;
+    }
+
+    .video-card__action {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* Source cards */
+    .source-card {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .source-card__avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Category cards */
+    .category-card {
+        padding: 12px 16px;
+    }
+
+    .category-card__name {
+        font-size: 14px;
+    }
+
+    /* Settings */
+    .settings-item {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    /* Animated tabs: more compact */
+    .animated-tabs {
+        padding: 3px;
+    }
+
+    .animated-tabs__tab {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    /* Auth pages */
+    .auth-card {
+        padding: 24px 16px;
+    }
+
+    /* Modals */
+    .video-modal {
+        border-radius: 12px;
+    }
+
+    .video-modal__header {
+        padding: 10px 12px;
+    }
+
+    .video-modal__title {
+        font-size: 13px;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 32px 16px;
+    }
+
+    .empty-state__icon {
+        width: 52px;
+        height: 52px;
+    }
+
+    .empty-state__title {
+        font-size: 16px;
     }
 }

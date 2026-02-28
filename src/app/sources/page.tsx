@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Stack, Title, Group, Button, Text, Loader, Badge, ActionIcon } from '@mantine/core';
-import { Plus, Tv, ListVideo, Trash2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Plus, Tv, ListVideo, Trash2, RefreshCw, AlertCircle, Edit2 } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase, Source, Category } from '@/lib/supabase';
 import { AddSourceModal } from '@/components/AddSourceModal';
+import { EditSourceModal } from '@/components/EditSourceModal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { formatRelativeTime } from '@/lib/youtube-utils';
 
@@ -18,6 +19,7 @@ export default function SourcesPage() {
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [deleteSource, setDeleteSource] = useState<Source | null>(null);
+    const [editSource, setEditSource] = useState<Source | null>(null);
     const [deleting, setDeleting] = useState(false);
     const [syncingId, setSyncingId] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export default function SourcesPage() {
 
     useEffect(() => {
         loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const handleDelete = async () => {
@@ -150,6 +152,11 @@ export default function SourcesPage() {
                                         >
                                             {source.type === 'channel' ? 'Kanal' : 'Playlist'}
                                         </Badge>
+                                        {source.title_filter && (
+                                            <Badge size="xs" variant="light" color="orange" mr={4}>
+                                                Filter: {source.title_filter}
+                                            </Badge>
+                                        )}
                                         {source.last_sync_at && (
                                             <span>Sync: {formatRelativeTime(source.last_sync_at)}</span>
                                         )}
@@ -162,6 +169,14 @@ export default function SourcesPage() {
                                 </div>
 
                                 <div className="source-card__actions">
+                                    <ActionIcon
+                                        variant="subtle"
+                                        color="gray"
+                                        size="sm"
+                                        onClick={() => setEditSource(source)}
+                                    >
+                                        <Edit2 size={14} />
+                                    </ActionIcon>
                                     <ActionIcon
                                         variant="subtle"
                                         color="gray"
@@ -192,6 +207,15 @@ export default function SourcesPage() {
                 onClose={() => setShowAddModal(false)}
                 categories={categories}
                 onSourceAdded={loadData}
+            />
+
+            {/* Edit Source Modal */}
+            <EditSourceModal
+                opened={!!editSource}
+                onClose={() => setEditSource(null)}
+                onSaved={loadData}
+                source={editSource}
+                categories={categories}
             />
 
             {/* Delete Confirm */}

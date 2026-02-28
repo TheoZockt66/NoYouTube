@@ -47,6 +47,7 @@ create table public.sources (
     etag text,
     error_count int default 0,
     last_error text,
+    title_filter text,                  -- optional: only import videos matching this text
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     unique(user_id, external_id)

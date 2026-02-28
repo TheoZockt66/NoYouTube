@@ -38,6 +38,7 @@ export interface Source {
     etag: string | null;
     error_count: number;
     last_error: string | null;
+    title_filter: string | null;
     created_at: string;
     updated_at: string;
     // joined

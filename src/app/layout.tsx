@@ -12,6 +12,14 @@ export const metadata: Metadata = {
     title: "NoYoutube - Dein YouTube Feed",
     description: "Personalisierter YouTube Feed ohne Ablenkung",
     applicationName: 'NoYoutube',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'black-translucent',
+        title: 'NoYoutube',
+    },
+    formatDetection: {
+        telephone: false,
+    },
 };
 
 export const viewport: Viewport = {
@@ -31,7 +39,7 @@ export default function RootLayout({
             <head>
                 <ColorSchemeScript defaultColorScheme="dark" />
             </head>
-            <body style={{ paddingBottom: '80px' }}>
+            <body>
                 <MantineProvider theme={theme} defaultColorScheme="dark">
                     <Notifications position="top-center" />
                     <AuthProvider>

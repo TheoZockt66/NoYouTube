@@ -104,6 +104,12 @@ async function syncSource(supabase: any, source: any) {
             videos = videos.filter(v => new Date(v.publishedAt) > lastSeen);
         }
 
+        // Apply title filter if set on this source
+        if (source.title_filter) {
+            const filterLower = source.title_filter.toLowerCase();
+            videos = videos.filter(v => v.title.toLowerCase().includes(filterLower));
+        }
+
         let newCount = 0;
 
         for (const video of videos) {

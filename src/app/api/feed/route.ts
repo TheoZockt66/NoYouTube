@@ -83,18 +83,20 @@ export async function GET(request: NextRequest) {
 
         if (error) throw error;
 
-        // Deduplicate by video_id (keep first = newest) and filter out Shorts
+        // Deduplicate by video_id and filter out short videos (Shorts etc.)
         const seen = new Set<string>();
         const deduped = (videos || []).filter(v => {
             if (seen.has(v.video_id)) return false;
             seen.add(v.video_id);
-            // Filter out YouTube Shorts by title
+            // Always filter out videos with #shorts in title
             const titleLower = (v.title || '').toLowerCase();
             if (titleLower.includes('#shorts') || titleLower.includes('#short')) return false;
-            // Filter out videos under 2 minutes (likely Shorts)
+            // Playlist videos are always shown
+            if (v.source?.type === 'playlist') return true;
+            // For channel videos: only show if duration > 3 minutes (or duration unknown)
             if (v.duration) {
                 const seconds = parseDurationToSeconds(v.duration);
-                if (seconds > 0 && seconds < 120) return false;
+                if (seconds > 0 && seconds < 180) return false;
             }
             return true;
         });
