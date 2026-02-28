@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NoYoutube
 
-## Getting Started
+Personalisierter YouTube-Feed ohne Ablenkung. Baue deinen eigenen "Neueste Videos"-Feed aus YouTube-Kanälen und Playlists, organisiert in Kategorien.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Quellen hinzufügen**: YouTube-Kanäle und Playlists via URL oder ID
+- **Kategorien**: Quellen in Kategorien organisieren (Tech, News, Sport, etc.)
+- **Deduplizierter Feed**: Videos erscheinen nur einmal, auch wenn sie über mehrere Quellen kommen
+- **Filter**: Alle / Nur Kanäle / Nur Playlists Tabs
+- **Video-Player**: YouTube Embed direkt in der App
+- **Gesehen/Gemerkt/Ausblenden**: Videos verwalten
+- **Effiziente Synchronisierung**: RSS/Atom Feeds (quota-frei) + YouTube Data API v3 als Fallback
+- **Dark Mode**: Trade Republic-inspiriertes Design
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Next.js 16** (App Router)
+- **Supabase** (Auth + PostgreSQL)
+- **Mantine UI v8** (Component Library)
+- **Framer Motion** (Animationen)
+- **Lucide React** (Icons)
+- **Vercel** (Deployment)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
 
-## Learn More
+1. **Supabase Projekt erstellen** auf [supabase.com](https://supabase.com)
+2. **SQL Schema ausführen**: Kopiere `supabase-schema.sql` in den Supabase SQL Editor
+3. **Environment Variables setzen**:
+   ```bash
+   cp .env.local.example .env.local
+   # Trage deine Supabase-Daten ein
+   ```
+4. **Dependencies installieren & starten**:
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Beschreibung | Erforderlich |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL | Ja |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anon Key | Ja |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Service Role Key (für Sync) | Ja |
+| `YOUTUBE_API_KEY` | YouTube Data API v3 Key | Optional |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Datenmodell
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **categories**: Nutzerdefinierte Kategorien
+- **sources**: YouTube-Kanäle und Playlists
+- **source_categories**: n:m Zuordnung
+- **video_items**: Alle Videos mit Deduplizierung
+- **video_summaries**: KI-Zusammenfassungen (kommt später)
+- **sync_logs**: Sync-Protokoll

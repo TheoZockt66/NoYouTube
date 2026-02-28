@@ -1,26 +1,781 @@
 @import "tailwindcss";
 
+/* ============================================
+   NoYoutube – Global Styles
+   Inspired by FitRepublic / Trade Republic
+   ============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --app-bg: #000000;
+    --app-fg: #ffffff;
+    --card-bg: #0a0a0a;
+    --subtle-bg: #111111;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --text-dimmed: rgba(255, 255, 255, 0.3);
+    --yt-red: #FF0000;
+    --success: #00C853;
+    --danger: #FF3B30;
+    --info: #0A84FF;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+[data-mantine-color-scheme="light"] {
+    --app-bg: #ffffff;
+    --app-fg: #000000;
+    --card-bg: #ffffff;
+    --subtle-bg: #f5f5f5;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --text-muted: rgba(0, 0, 0, 0.5);
+    --text-dimmed: rgba(0, 0, 0, 0.3);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    background: var(--app-bg);
+    color: var(--app-fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    padding-bottom: 120px;
+}
+
+/* ============================================
+   Navbar (Bottom Navigation)
+   ============================================ */
+.navbar-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+    padding-top: 8px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: 999px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    pointer-events: auto;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-mantine-color-scheme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.navbar__item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.navbar__item--active {
+    color: var(--app-fg);
+}
+
+.navbar__label {
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .navbar__label {
+        display: none;
+    }
+
+    .navbar__item {
+        padding: 8px 14px;
+    }
+}
+
+.navbar__lamp-indicator {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.navbar__lamp-bar {
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--app-fg);
+}
+
+.navbar__lamp-glow {
+    width: 40px;
+    height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    margin-top: -2px;
+}
+
+[data-mantine-color-scheme="light"] .navbar__lamp-glow {
+    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.15) 0%, transparent 70%);
+}
+
+/* ============================================
+   Animated Tabs
+   ============================================ */
+.animated-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--subtle-bg);
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.animated-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.animated-tabs__tab {
+    position: relative;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.animated-tabs__tab--active {
+    color: var(--app-fg);
+}
+
+.animated-tabs__label {
+    position: relative;
+    z-index: 1;
+}
+
+.animated-tabs__lamp {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-mantine-color-scheme="light"] .animated-tabs__lamp {
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================
+   Video Card
+   ============================================ */
+.video-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.video-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.video-card:active {
+    transform: scale(0.98);
+}
+
+.video-card--watched {
+    opacity: 0.6;
+}
+
+.video-card__thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    cursor: pointer;
+    background: #111;
+}
+
+.video-card__thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.video-card:hover .video-card__thumbnail img {
+    transform: scale(1.05);
+}
+
+.video-card__play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.video-card__thumbnail:hover .video-card__play-overlay {
+    opacity: 1;
+}
+
+.video-card__duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.video-card__body {
+    padding: 12px 16px 16px;
+}
+
+.video-card__title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    cursor: pointer;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-card__title:hover {
+    text-decoration: underline;
+}
+
+.video-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.video-card__channel {
+    font-weight: 500;
+}
+
+.video-card__dot {
+    color: var(--text-dimmed);
+}
+
+.video-card__actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.video-card__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.video-card__action:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--app-fg);
+}
+
+.video-card__action--active {
+    color: var(--info);
+}
+
+.video-card__action--active:hover {
+    color: var(--info);
+}
+
+/* ============================================
+   Video Player Modal
+   ============================================ */
+.video-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 16px;
+    animation: fadeIn 0.2s ease;
+}
+
+.video-modal {
+    width: 100%;
+    max-width: 960px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    animation: slideUp 0.3s ease;
+}
+
+.video-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.video-modal__title {
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+    margin-right: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.video-modal__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.video-modal__close:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.video-modal__player {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+}
+
+.video-modal__player iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ============================================
+   Source Card
+   ============================================ */
+.source-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.2s ease;
+}
+
+.source-card:hover {
+    transform: translateY(-1px);
+}
+
+.source-card__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--subtle-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.source-card__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.source-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.source-card__title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.source-card__meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.source-card__actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* ============================================
+   Category Card
+   ============================================ */
+.category-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.category-card:active {
+    transform: scale(0.98);
+}
+
+.category-card__color {
+    width: 12px;
+    height: 40px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.category-card__body {
+    flex: 1;
+}
+
+.category-card__name {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.category-card__count {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.category-card__actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* ============================================
+   Section labels (FitRepublic style)
+   ============================================ */
+.section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dimmed);
+    margin-bottom: 8px;
+}
+
+/* ============================================
+   Page header
+   ============================================ */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.page-header__back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: none;
+    color: var(--app-fg);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.page-header__back:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================
+   Resolve result
+   ============================================ */
+.resolve-result {
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(0, 200, 83, 0.08);
+    border: 1px solid rgba(0, 200, 83, 0.2);
+}
+
+/* ============================================
+   Empty state
+   ============================================ */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.empty-state__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--subtle-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: var(--text-muted);
+}
+
+.empty-state__title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.empty-state__description {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+/* ============================================
+   Sync indicator
+   ============================================ */
+.sync-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(10, 132, 255, 0.1);
+    border: 1px solid rgba(10, 132, 255, 0.2);
+    font-size: 12px;
+    color: var(--info);
+}
+
+.sync-indicator__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--info);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Loading skeleton
+   ============================================ */
+.skeleton {
+    background: linear-gradient(90deg, var(--subtle-bg) 25%, rgba(255, 255, 255, 0.05) 50%, var(--subtle-bg) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ============================================
+   Auth pages
+   ============================================ */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 32px 24px;
+}
+
+.auth-logo {
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.auth-logo span {
+    color: var(--yt-red);
+}
+
+.auth-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+/* ============================================
+   Settings
+   ============================================ */
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.settings-item__label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.settings-item__desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============================================
+   Video grid responsive
+   ============================================ */
+.video-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 640px) {
+    .video-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .video-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
