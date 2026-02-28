@@ -342,6 +342,100 @@ body {
     color: var(--info);
 }
 
+.video-card__action--ai {
+    color: var(--text-muted);
+}
+
+.video-card__action--ai:hover {
+    color: #a855f7;
+    background: rgba(168, 85, 247, 0.1);
+}
+
+.video-card__action--ai.video-card__action--active {
+    color: #a855f7;
+}
+
+.video-card__spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.video-card__summary {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    font-size: 13px;
+    line-height: 1.5;
+    animation: fadeIn 0.3s ease;
+}
+
+.video-card__summary-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.video-card__summary-error {
+    color: var(--danger);
+    font-size: 12px;
+}
+
+.video-card__summary-tldr {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #c084fc;
+}
+
+.video-card__summary-tldr svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.video-card__summary-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px 0;
+}
+
+.video-card__summary-bullets li {
+    position: relative;
+    padding-left: 14px;
+    margin-bottom: 4px;
+    color: var(--app-fg);
+    opacity: 0.85;
+}
+
+.video-card__summary-bullets li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #a855f7;
+}
+
+.video-card__summary-relevant {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding-top: 6px;
+    border-top: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 /* ============================================
    Video Player Modal
    ============================================ */

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Stack, Title, Group, Button, Text, Loader, Badge } from '@mantine/core';
-import { RefreshCw, Plus, Bookmark } from 'lucide-react';
+import { RefreshCw, Plus, Bookmark, LayoutGrid, CalendarDays } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase, Category, VideoItem } from '@/lib/supabase';
 
@@ -18,7 +18,7 @@ import { AnimatedTabs } from '@/components/AnimatedTabs';
 
 export default function FeedPage() {
     const router = useRouter();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, session } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
     const [videos, setVideos] = useState<VideoItem[]>([]);
     const [activeCategory, setActiveCategory] = useState('all');
@@ -29,6 +29,7 @@ export default function FeedPage() {
     const [syncing, setSyncing] = useState(false);
     const [playingVideo, setPlayingVideo] = useState<VideoItem | null>(null);
     const [totalCount, setTotalCount] = useState(0);
+    const [viewMode, setViewMode] = useState<'date' | 'grid'>('date');
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -50,7 +51,6 @@ export default function FeedPage() {
     }, [user]);
 
     // Load feed
-    const { session } = useAuth();
 
     const loadFeed = useCallback(async (pageNum: number = 1, append: boolean = false) => {
         if (!user) return;
@@ -223,6 +223,14 @@ export default function FeedPage() {
                             {totalCount} Videos
                         </Badge>
                     )}
+                    <button
+                        className="video-card__action"
+                        onClick={() => setViewMode(viewMode === 'date' ? 'grid' : 'date')}
+                        title={viewMode === 'date' ? 'Grid-Ansicht' : 'Zeitansicht'}
+                        style={{ marginLeft: 'auto' }}
+                    >
+                        {viewMode === 'date' ? <LayoutGrid size={18} /> : <CalendarDays size={18} />}
+                    </button>
                 </Group>
 
                 {/* Syncing indicator */}
@@ -258,10 +266,25 @@ export default function FeedPage() {
                             Quellen hinzufügen
                         </Button>
                     </div>
+                ) : viewMode === 'grid' ? (
+                    /* Grid view — flat list */
+                    <div className="video-grid">
+                        {videos.map(video => (
+                            <VideoCard
+                                key={video.id}
+                                video={video}
+                                onPlay={(v) => setPlayingVideo(v)}
+                                onToggleWatched={handleToggleWatched}
+                                onToggleBookmark={handleToggleBookmark}
+                                onHide={handleHideVideo}
+                                accessToken={session?.access_token}
+                            />
+                        ))}
+                    </div>
                 ) : (
+                    /* Date-grouped view */
                     <Stack gap="xl">
                         {(() => {
-                            // Group videos by date
                             const groups: { label: string; videos: VideoItem[] }[] = [];
                             const today = new Date();
                             today.setHours(0, 0, 0, 0);
@@ -310,6 +333,7 @@ export default function FeedPage() {
                                                 onToggleWatched={handleToggleWatched}
                                                 onToggleBookmark={handleToggleBookmark}
                                                 onHide={handleHideVideo}
+                                                accessToken={session?.access_token}
                                             />
                                         ))}
                                     </div>
