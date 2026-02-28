@@ -366,7 +366,9 @@ export default function FeedPage() {
             {playingVideo && (
                 <VideoPlayerModal
                     videoId={playingVideo.video_id}
+                    videoItemId={playingVideo.id}
                     title={playingVideo.title}
+                    userId={user?.id || ''}
                     onClose={() => {
                         setPlayingVideo(null);
                         // Mark as watched

@@ -156,7 +156,27 @@ create policy "Users can manage own summaries"
     with check (auth.uid() = user_id);
 
 -- ============================================
--- 6. SYNC_LOG (für Debugging)
+-- 6. VIDEO_NOTES (Notizen pro Video)
+-- ============================================
+create table public.video_notes (
+    id uuid primary key default uuid_generate_v4(),
+    video_item_id uuid not null references public.video_items(id) on delete cascade,
+    user_id uuid not null references auth.users(id) on delete cascade,
+    note text not null default '',
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    unique(video_item_id, user_id)
+);
+
+alter table public.video_notes enable row level security;
+
+create policy "Users can manage own notes"
+    on public.video_notes for all
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+
+-- ============================================
+-- 7. SYNC_LOG (für Debugging)
 -- ============================================
 create table public.sync_logs (
     id uuid primary key default uuid_generate_v4(),

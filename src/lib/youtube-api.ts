@@ -272,3 +272,25 @@ export async function fetchPlaylistItems(
         nextPageToken: data.nextPageToken,
     };
 }
+
+/**
+ * Fetch ALL videos from a playlist by paginating through all pages.
+ * Falls back to RSS (max 15) if no API key.
+ */
+export async function fetchAllPlaylistItems(playlistId: string): Promise<YouTubeVideoInfo[]> {
+    if (!YOUTUBE_API_KEY) {
+        // Fallback to RSS (max 15 items)
+        return fetchPlaylistRSS(playlistId);
+    }
+
+    const allVideos: YouTubeVideoInfo[] = [];
+    let pageToken: string | undefined;
+
+    do {
+        const result = await fetchPlaylistItems(playlistId, 50, pageToken);
+        allVideos.push(...result.videos);
+        pageToken = result.nextPageToken;
+    } while (pageToken);
+
+    return allVideos;
+}

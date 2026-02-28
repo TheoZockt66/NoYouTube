@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { fetchChannelRSS, fetchPlaylistRSS, fetchVideoDurations } from '@/lib/youtube-api';
+import { fetchChannelRSS, fetchAllPlaylistItems, fetchVideoDurations } from '@/lib/youtube-api';
 
 // Create a Supabase client authenticated as the requesting user
 function getAuthClient(request: NextRequest) {
@@ -94,8 +94,8 @@ async function syncSource(supabase: any, source: any) {
             // Use RSS feed (quota-free)
             videos = await fetchChannelRSS(source.external_id);
         } else {
-            // Playlist
-            videos = await fetchPlaylistRSS(source.external_id);
+            // Playlist — fetch ALL items via API (paginated)
+            videos = await fetchAllPlaylistItems(source.external_id);
         }
 
         // Filter only new videos since last sync
