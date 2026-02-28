@@ -275,22 +275,28 @@ export async function fetchPlaylistItems(
 
 /**
  * Fetch ALL videos from a playlist by paginating through all pages.
- * Falls back to RSS (max 15) if no API key.
+ * Falls back to RSS (max 15) if no API key or if API key is invalid/exhausted.
  */
 export async function fetchAllPlaylistItems(playlistId: string): Promise<YouTubeVideoInfo[]> {
-    if (!YOUTUBE_API_KEY) {
+    if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY.trim() === '') {
         // Fallback to RSS (max 15 items)
         return fetchPlaylistRSS(playlistId);
     }
 
-    const allVideos: YouTubeVideoInfo[] = [];
-    let pageToken: string | undefined;
+    try {
+        const allVideos: YouTubeVideoInfo[] = [];
+        let pageToken: string | undefined;
 
-    do {
-        const result = await fetchPlaylistItems(playlistId, 50, pageToken);
-        allVideos.push(...result.videos);
-        pageToken = result.nextPageToken;
-    } while (pageToken);
+        do {
+            const result = await fetchPlaylistItems(playlistId, 50, pageToken);
+            allVideos.push(...result.videos);
+            pageToken = result.nextPageToken;
+        } while (pageToken);
 
-    return allVideos;
+        return allVideos;
+    } catch (error) {
+        console.warn('YouTube API fetch failed (invalid key or quota exceeded). Falling back to RSS feed.', error);
+        // Fallback to RSS if the API request fails
+        return fetchPlaylistRSS(playlistId);
+    }
 }
