@@ -66,20 +66,32 @@ export async function POST(request: NextRequest) {
         const videoDesc = video.description || '';
         const channelName = video.channel_title || '';
 
-        const prompt = `Du bist ein hilfreicher Assistent. Fasse das folgende YouTube-Video zusammen.
+        const prompt = `Du bist ein Video-Analyst. Analysiere das folgende YouTube-Video detailliert anhand von Titel und Beschreibung.
 
 Video-Titel: ${videoTitle}
 Kanal: ${channelName}
 Beschreibung: ${videoDesc}
 
-Erstelle eine Zusammenfassung im folgenden JSON-Format (auf Deutsch):
+Erstelle eine DETAILLIERTE Analyse im folgenden JSON-Format (auf Deutsch):
 {
-  "tldr": "Ein prägnanter Satz, der den Kern des Videos beschreibt",
-  "bullets": ["Punkt 1", "Punkt 2", "Punkt 3", "Punkt 4", "Punkt 5"],
-  "why_relevant": "Warum dieses Video sehenswert sein könnte"
+  "tldr": "2-3 Sätze die den Inhalt des Videos zusammenfassen. Sei spezifisch und nenne konkrete Themen.",
+  "topics": ["Thema 1", "Thema 2", "Thema 3"],
+  "facts": [
+    "Konkreter Fakt oder Aussage 1 mit Zahlen/Daten wenn verfügbar",
+    "Konkreter Fakt oder Aussage 2",
+    "Konkreter Fakt oder Aussage 3",
+    "Konkreter Fakt oder Aussage 4",
+    "Konkreter Fakt oder Aussage 5"
+  ],
+  "sources_mentioned": ["Quelle oder Referenz die im Video erwähnt wird, z.B. Studien, Berichte, Personen, Unternehmen"],
+  "why_relevant": "Warum dieses Video sehenswert sein könnte und für wen es relevant ist"
 }
 
-Antworte NUR mit dem JSON, ohne Markdown-Code-Blocks oder andere Formatierung.`;
+Wichtig:
+- Sei bei den Fakten möglichst konkret und nenne Zahlen, Daten, Namen wenn aus Titel/Beschreibung ableitbar
+- Bei "sources_mentioned" liste alle Personen, Studien, Unternehmen, Gesetze oder andere Quellen die im Titel oder der Beschreibung erwähnt werden
+- Bei "topics" nenne die Hauptthemen als kurze Tags
+- Antworte NUR mit dem JSON, ohne Markdown-Code-Blocks oder andere Formatierung`;
 
         // Call Gemini API
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
@@ -91,7 +103,7 @@ Antworte NUR mit dem JSON, ohne Markdown-Code-Blocks oder andere Formatierung.`;
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
                     temperature: 0.3,
-                    maxOutputTokens: 1024,
+                    maxOutputTokens: 2048,
                 },
             }),
         });
@@ -106,22 +118,30 @@ Antworte NUR mit dem JSON, ohne Markdown-Code-Blocks oder andere Formatierung.`;
         const responseText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
         // Parse JSON from response
-        let parsed: { tldr?: string; bullets?: string[]; why_relevant?: string } = {};
+        let parsed: {
+            tldr?: string;
+            topics?: string[];
+            facts?: string[];
+            sources_mentioned?: string[];
+            why_relevant?: string;
+        } = {};
         try {
-            // Remove potential markdown code blocks
             const cleaned = responseText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
             parsed = JSON.parse(cleaned);
         } catch {
-            // If JSON parse fails, use raw text as tldr
-            parsed = { tldr: responseText.trim(), bullets: [], why_relevant: '' };
+            parsed = { tldr: responseText.trim(), topics: [], facts: [], sources_mentioned: [], why_relevant: '' };
         }
 
-        // Store summary in DB
+        // Store summary in DB — we pack topics, facts, sources_mentioned into the `bullets` JSONB column
         const summaryData = {
             user_id: user.id,
             video_id: video.video_id,
             tldr: parsed.tldr || '',
-            bullets: parsed.bullets || [],
+            bullets: {
+                topics: parsed.topics || [],
+                facts: parsed.facts || [],
+                sources_mentioned: parsed.sources_mentioned || [],
+            },
             why_relevant: parsed.why_relevant || '',
             model_version: GEMINI_MODEL,
             input_type: 'description',

@@ -4,11 +4,14 @@
 import { useState } from 'react';
 import { VideoItem } from '@/lib/supabase';
 import { formatRelativeTime, formatDuration, formatViewCount } from '@/lib/youtube-utils';
-import { Eye, Bookmark, BookmarkCheck, EyeOff, Play, Sparkles, Loader2, ChevronUp } from 'lucide-react';
+import { Eye, Bookmark, BookmarkCheck, EyeOff, Play, Sparkles } from 'lucide-react';
+import { SummaryModal } from './SummaryModal';
 
-interface VideoSummaryData {
+interface SummaryData {
     tldr: string;
-    bullets: string[];
+    topics: string[];
+    facts: string[];
+    sources_mentioned: string[];
     why_relevant: string;
 }
 
@@ -25,20 +28,19 @@ export function VideoCard({ video, onToggleWatched, onToggleBookmark, onHide, on
     const thumbnail = video.thumbnail_high_url || video.thumbnail_medium_url || video.thumbnail_url;
     const isChannel = video.source?.type === 'channel';
 
-    const [summary, setSummary] = useState<VideoSummaryData | null>(null);
+    const [summary, setSummary] = useState<SummaryData | null>(null);
     const [summaryLoading, setSummaryLoading] = useState(false);
-    const [summaryOpen, setSummaryOpen] = useState(false);
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
     const [summaryError, setSummaryError] = useState('');
 
     const handleSummarize = async () => {
-        if (summary) {
-            setSummaryOpen(!summaryOpen);
-            return;
-        }
+        setSummaryModalOpen(true);
+
+        // If already loaded, just show the modal
+        if (summary) return;
 
         setSummaryLoading(true);
         setSummaryError('');
-        setSummaryOpen(true);
 
         try {
             const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -56,10 +58,18 @@ export function VideoCard({ video, onToggleWatched, onToggleBookmark, onHide, on
                 throw new Error(data.error || 'Zusammenfassung fehlgeschlagen');
             }
 
+            // Parse the response — bullets is a JSONB object with topics, facts, sources_mentioned
+            const raw = data.summary;
+            const bullets = typeof raw.bullets === 'object' && !Array.isArray(raw.bullets)
+                ? raw.bullets
+                : { topics: [], facts: Array.isArray(raw.bullets) ? raw.bullets : [], sources_mentioned: [] };
+
             setSummary({
-                tldr: data.summary.tldr || '',
-                bullets: data.summary.bullets || [],
-                why_relevant: data.summary.why_relevant || '',
+                tldr: raw.tldr || '',
+                topics: bullets.topics || [],
+                facts: bullets.facts || [],
+                sources_mentioned: bullets.sources_mentioned || [],
+                why_relevant: raw.why_relevant || '',
             });
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Fehler';
@@ -70,130 +80,97 @@ export function VideoCard({ video, onToggleWatched, onToggleBookmark, onHide, on
     };
 
     return (
-        <div className={`video-card ${video.watched ? 'video-card--watched' : ''}`}>
-            <div
-                className="video-card__thumbnail"
-                onClick={() => onPlay?.(video)}
-                role="button"
-                tabIndex={0}
-            >
-                {thumbnail && (
-                    <img
-                        src={thumbnail}
-                        alt={video.title}
-                        loading="lazy"
-                    />
-                )}
-                <div className="video-card__play-overlay">
-                    <Play size={32} fill="white" />
-                </div>
-                {video.duration && (
-                    <span className="video-card__duration">
-                        {formatDuration(video.duration)}
-                    </span>
-                )}
-            </div>
-
-            <div className="video-card__body">
-                <h3 className="video-card__title" onClick={() => onPlay?.(video)}>
-                    {video.title}
-                </h3>
-
-                <div className="video-card__meta">
-                    <span className="video-card__channel">{video.channel_title}</span>
-                    <span className="video-card__dot">·</span>
-                    <span className="video-card__date">{formatRelativeTime(video.published_at)}</span>
-                    {video.view_count !== null && video.view_count !== undefined && (
-                        <>
-                            <span className="video-card__dot">·</span>
-                            <span className="video-card__views">
-                                {formatViewCount(video.view_count)} Aufrufe
-                            </span>
-                        </>
+        <>
+            <div className={`video-card ${video.watched ? 'video-card--watched' : ''}`}>
+                <div
+                    className="video-card__thumbnail"
+                    onClick={() => onPlay?.(video)}
+                    role="button"
+                    tabIndex={0}
+                >
+                    {thumbnail && (
+                        <img
+                            src={thumbnail}
+                            alt={video.title}
+                            loading="lazy"
+                        />
+                    )}
+                    <div className="video-card__play-overlay">
+                        <Play size={32} fill="white" />
+                    </div>
+                    {video.duration && (
+                        <span className="video-card__duration">
+                            {formatDuration(video.duration)}
+                        </span>
                     )}
                 </div>
 
-                <div className="video-card__actions">
-                    <button
-                        className={`video-card__action ${video.watched ? 'video-card__action--active' : ''}`}
-                        onClick={() => onToggleWatched?.(video)}
-                        title={video.watched ? 'Als ungesehen markieren' : 'Als gesehen markieren'}
-                    >
-                        <Eye size={16} />
-                    </button>
-                    <button
-                        className={`video-card__action ${video.bookmarked ? 'video-card__action--active' : ''}`}
-                        onClick={() => onToggleBookmark?.(video)}
-                        title={video.bookmarked ? 'Lesezeichen entfernen' : 'Lesezeichen setzen'}
-                    >
-                        {video.bookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
-                    </button>
-                    <button
-                        className="video-card__action"
-                        onClick={() => onHide?.(video)}
-                        title="Video ausblenden"
-                    >
-                        <EyeOff size={16} />
-                    </button>
+                <div className="video-card__body">
+                    <h3 className="video-card__title" onClick={() => onPlay?.(video)}>
+                        {video.title}
+                    </h3>
 
-                    {/* AI Summary button — only for channel videos */}
-                    {isChannel && (
-                        <button
-                            className={`video-card__action video-card__action--ai ${summary ? 'video-card__action--active' : ''}`}
-                            onClick={handleSummarize}
-                            title="KI-Zusammenfassung"
-                            disabled={summaryLoading}
-                        >
-                            {summaryLoading ? (
-                                <Loader2 size={16} className="video-card__spin" />
-                            ) : summaryOpen && summary ? (
-                                <ChevronUp size={16} />
-                            ) : (
-                                <Sparkles size={16} />
-                            )}
-                        </button>
-                    )}
-                </div>
-
-                {/* AI Summary display */}
-                {summaryOpen && (
-                    <div className="video-card__summary">
-                        {summaryLoading && (
-                            <div className="video-card__summary-loading">
-                                <Loader2 size={16} className="video-card__spin" />
-                                <span>Zusammenfassung wird erstellt...</span>
-                            </div>
-                        )}
-
-                        {summaryError && (
-                            <div className="video-card__summary-error">{summaryError}</div>
-                        )}
-
-                        {summary && (
+                    <div className="video-card__meta">
+                        <span className="video-card__channel">{video.channel_title}</span>
+                        <span className="video-card__dot">·</span>
+                        <span className="video-card__date">{formatRelativeTime(video.published_at)}</span>
+                        {video.view_count !== null && video.view_count !== undefined && (
                             <>
-                                <div className="video-card__summary-tldr">
-                                    <Sparkles size={12} />
-                                    {summary.tldr}
-                                </div>
-
-                                {summary.bullets && summary.bullets.length > 0 && (
-                                    <ul className="video-card__summary-bullets">
-                                        {summary.bullets.map((bullet, i) => (
-                                            <li key={i}>{bullet}</li>
-                                        ))}
-                                    </ul>
-                                )}
-
-                                {summary.why_relevant && (
-                                    <div className="video-card__summary-relevant">
-                                        {summary.why_relevant}
-                                    </div>
-                                )}
+                                <span className="video-card__dot">·</span>
+                                <span className="video-card__views">
+                                    {formatViewCount(video.view_count)} Aufrufe
+                                </span>
                             </>
                         )}
                     </div>
-                )}
+
+                    <div className="video-card__actions">
+                        <button
+                            className={`video-card__action ${video.watched ? 'video-card__action--active' : ''}`}
+                            onClick={() => onToggleWatched?.(video)}
+                            title={video.watched ? 'Als ungesehen markieren' : 'Als gesehen markieren'}
+                        >
+                            <Eye size={16} />
+                        </button>
+                        <button
+                            className={`video-card__action ${video.bookmarked ? 'video-card__action--active' : ''}`}
+                            onClick={() => onToggleBookmark?.(video)}
+                            title={video.bookmarked ? 'Lesezeichen entfernen' : 'Lesezeichen setzen'}
+                        >
+                            {video.bookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+                        </button>
+                        <button
+                            className="video-card__action"
+                            onClick={() => onHide?.(video)}
+                            title="Video ausblenden"
+                        >
+                            <EyeOff size={16} />
+                        </button>
+
+                        {/* AI Summary button — only for channel videos */}
+                        {isChannel && (
+                            <button
+                                className={`video-card__action video-card__action--ai ${summary ? 'video-card__action--active' : ''}`}
+                                onClick={handleSummarize}
+                                title="KI-Zusammenfassung"
+                            >
+                                <Sparkles size={16} />
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
-        </div>
+
+            {/* Summary Modal */}
+            <SummaryModal
+                opened={summaryModalOpen}
+                onClose={() => setSummaryModalOpen(false)}
+                summary={summary}
+                loading={summaryLoading}
+                error={summaryError}
+                videoTitle={video.title}
+                channelTitle={video.channel_title || ''}
+            />
+        </>
     );
 }

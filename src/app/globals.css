@@ -437,6 +437,61 @@ body {
 }
 
 /* ============================================
+   Summary Modal Sections
+   ============================================ */
+.summary-section {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.summary-section__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #a855f7;
+    margin-bottom: 8px;
+}
+
+.summary-section--highlight {
+    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(168, 85, 247, 0.12);
+}
+
+.summary-facts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-facts li {
+    position: relative;
+    padding: 6px 0 6px 18px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--app-fg);
+    opacity: 0.85;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.summary-facts li:last-child {
+    border-bottom: none;
+}
+
+.summary-facts li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #a855f7;
+    font-size: 14px;
+}
+
+/* ============================================
    Video Player Modal
    ============================================ */
 .video-modal-overlay {
